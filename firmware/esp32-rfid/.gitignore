@@ -1,0 +1,50 @@
+# =========================
+# SECRET CONFIG FILES
+# =========================
+
+# archivos con credenciales
+secrets.h
+**/secrets.h
+
+# =========================
+# ARDUINO BUILD FILES
+# =========================
+
+*.ino.cpp
+*.ino.bin
+*.elf
+*.map
+
+# carpetas de compilacion
+build/
+dist/
+
+# =========================
+# VS CODE
+# =========================
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# =========================
+# SYSTEM FILES
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+# LOG FILES
+# =========================
+
+*.log
+
+# =========================
+# TEMP FILES
+# =========================
+
+*.tmp
+*.temp

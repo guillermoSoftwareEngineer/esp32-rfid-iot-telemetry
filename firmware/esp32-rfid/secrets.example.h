@@ -1,0 +1,10 @@
+#ifndef SECRETS_H
+#define SECRETS_H
+
+#define WIFI_SSID "YOUR_WIFI"
+#define WIFI_PASSWORD "YOUR_PASSWORD"
+
+#define SHEET_ID "YOUR_SHEET_ID"
+#define API_ENDPOINT "YOUR_SCRIPT_URL"
+
+#endif
