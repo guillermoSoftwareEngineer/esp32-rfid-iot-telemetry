@@ -72,7 +72,8 @@ const unsigned long INTERVALO_HEARTBEAT = 30000;
 String tarjetasAutorizadas[] = { 
   "A1B2C3D4",
   "E5F6G7H8",
-  "12345678"
+  "12345678",
+  "01020304" // probar acceso autorizado y denegado
 };
 
 
