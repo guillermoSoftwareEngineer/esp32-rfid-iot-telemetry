@@ -41,6 +41,8 @@ This demo shows the complete system workflow:
 3. Google Apps Script processes the request
 4. The event is stored in Google Sheets
 
+![System Demo](diagrams/demo_1.gif)
+
 ---
 
 ## System Architecture
