@@ -14,7 +14,7 @@ Esta arquitectura permite construir sistemas IoT funcionales sin necesidad de se
 
 # Arquitectura del sistema
 
-![Arquitectura del sistema](diagrams/system-architecture-es.png)
+![Arquitectura del sistema](../diagrams/system-architecture-es.png)
 
 El sistema se organiza en tres capas principales:
 
@@ -28,7 +28,7 @@ El dispositivo recopila información del sistema y la envía al backend mediante
 
 # Arquitectura IoT
 
-![Arquitectura IoT](diagrams/iot-architecture-v1-es.png)
+![Arquitectura IoT](../diagrams/iot-architecture-v1-es.png)
 
 La arquitectura general del sistema sigue el siguiente flujo:
 
@@ -40,7 +40,7 @@ Este enfoque permite implementar soluciones IoT utilizando únicamente servicios
 
 # Arquitectura del Firmware del Dispositivo
 
-![Arquitectura Firmware ESP32](diagrams/device-firmware-architecture-v1-es.png)
+![Arquitectura Firmware ESP32](../diagrams/device-firmware-architecture-v1-es.png)
 
 El firmware del ESP32 está estructurado en módulos que gestionan:
 

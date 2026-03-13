@@ -14,7 +14,7 @@ This architecture allows building functional IoT systems without requiring dedic
 
 # System Architecture
 
-![System Architecture](diagrams/system-architecture-en.png)
+![System Architecture](../diagrams/system-architecture-en.png)
 
 The system is organized into three main layers:
 
@@ -28,7 +28,7 @@ The device collects system information and sends it to the backend using HTTP re
 
 # IoT Architecture
 
-![IoT Architecture](diagrams/iot-architecture-v1-en.png)
+![IoT Architecture](../diagrams/iot-architecture-v1-en.png)
 
 The overall architecture follows this data flow:
 
@@ -40,7 +40,7 @@ This approach allows IoT devices to communicate directly with cloud services usi
 
 # Device Firmware Architecture
 
-![ESP32 Firmware Architecture](diagrams/device-firmware-architecture-v1-en.png)
+![ESP32 Firmware Architecture](../diagrams/device-firmware-architecture-v1-en.png)
 
 The ESP32 firmware is structured into modules responsible for:
 
