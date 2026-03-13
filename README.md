@@ -75,6 +75,64 @@ Device telemetry and diagnostics
 This diagram illustrates how the embedded device interacts with the cloud backend and storage layer.
 
 ---
+## Firmware Flow
+
+![Firmware Flow](diagrams/firmware-flow-diagram-v1-en.png)
+
+---
+
+## Hardware
+
+Hardware documentation:
+
+- [Bill of Materials](hardware/BOM.md)
+
+---
+
+## Hardware Wiring
+
+The following diagram shows the physical wiring of the ESP32 RFID IoT system.
+
+![Hardware Wiring](hardware/wiring-diagram-v1.jpg)
+
+### Pin Connections
+
+| Component    | Pin     | ESP32 GPIO |
+| ------------ | ------- | ---------- |
+| RFID RC522   | SDA     | GPIO5      |
+| RFID RC522   | SCK     | GPIO18     |
+| RFID RC522   | MOSI    | GPIO23     |
+| RFID RC522   | MISO    | GPIO19     |
+| RFID RC522   | RST     | GPIO4      |
+| RFID RC522   | VCC     | 3.3V       |
+| RFID RC522   | GND     | GND        |
+| LCD 16x2 I2C | SDA     | GPIO21     |
+| LCD 16x2 I2C | SCL     | GPIO22     |
+| LCD 16x2 I2C | VCC     | 3.3V       |
+| LCD 16x2 I2C | GND     | GND        |
+| Green LED    | Signal  | GPIO26     |
+| Green LED    | Cathode | GND        |
+| Red LED      | Signal  | GPIO27     |
+| Red LED      | Cathode | GND        |
+| Buzzer       | Signal  | GPIO25     |
+| Buzzer       | GND     | GND        |
+| Push Button  | Signal  | GPIO13     |
+| Push Button  | GND     | GND        |
+
+### Hardware Components
+
+The hardware setup includes:
+
+* ESP32 microcontroller as the main IoT device
+* RFID RC522 module for card detection
+* LCD display for system feedback
+* LEDs for visual status indicators
+* Buzzer for audio alerts
+* Push button for optional input
+
+The ESP32 connects to WiFi and sends access events to the backend implemented using Google Apps Script.
+
+---
 
 ## Repository Structure
 
