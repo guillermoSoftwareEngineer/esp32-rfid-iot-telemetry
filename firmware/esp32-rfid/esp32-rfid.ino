@@ -6,7 +6,6 @@
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
 #include <MFRC522.h>
-#include "secrets.h"
 
 
 // Version del firmware del dispositivo
@@ -14,12 +13,10 @@
 #define FIRMWARE_VERSION "1.0.0"
 
 
-// configuracion de red del dispositivo en wokwi por defecto tiene esos valores
-//para una red real se usan las claves reales y se deben guardar como variables 
-// en el git ignore por seguridad
+// configuracion de red del dispositivo en wokwi
 
-const char* WIFI_SSID     = "Wokwi-GUEST"; //por defecto
-const char* WIFI_PASSWORD = ""; //por defecto
+const char* WIFI_SSID     = "Wokwi-GUEST"; 
+const char* WIFI_PASSWORD = ""; 
 
 // identificador unico del dispositivo dentro del sistema o serie maquina
 
@@ -27,10 +24,8 @@ const char* DEVICE_ID     = "GTech-ESP32-001";
 
 // endpoint donde el dispositivo reporta eventos al backend URL del servidor
 
-#include "secrets.h"
+const char* BACKEND_URL = "https://script.google.com/macros/s/AKfycbwA03zbv9tjDu1STr0X4c-7mgjOllzGlO6WFEqcd4Jj7jH0nmmB5KHaUzeAy5rvpBaB/exec";// version V1.3
 
-const char* BACKEND_URL = BACKEND_URL_SECRET; // aqui se usa el id del app script
-//Aqui se usa una variable, para no revelar la conexion con el backend
 
 // asignacion de pines usados por el hardware
 
@@ -297,6 +292,11 @@ void enviarEvento(String tipoEvento, String payloadExtra) {
   HTTPClient http;
 
   http.begin(BACKEND_URL);
+
+  // fuerza al ESP32 a seguir la redireccion 302 de Google Apps Script
+  // sin esto el POST se convierte en GET y los datos no llegan al backend
+
+  http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
 
   http.addHeader("Content-Type", "application/json");
 
