@@ -6,11 +6,51 @@
  * y los almacena en Google Sheets para monitoreo y auditoria.
  *
  * Hojas gestionadas:
- *   - Accesos   → eventos de lectura RFID (CARD_SCAN)
- *   - Eventos   → heartbeats y diagnosticos
+ *   - Accesos    → eventos de lectura RFID (CARD_SCAN)
+ *   - Eventos    → heartbeats y diagnosticos
  *   - Inventario → estado actual de cada dispositivo
- *   - Logs      → errores del servidor
+ *   - Logs       → errores del servidor
  */
+
+
+/**
+ * doGet - endpoint de lectura para el dashboard
+ *
+ * Devuelve el estado actual de todos los dispositivos
+ * registrados en la hoja Inventario en formato JSON.
+ *
+ * @returns {TextOutput} JSON con array de dispositivos
+ */
+function doGet(e) {
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var invSheet = ss.getSheetByName("Inventario");
+
+  // si no existe inventario devolver array vacio
+  if (!invSheet) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ dispositivos: [] }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var datos = invSheet.getDataRange().getValues();
+  var dispositivos = [];
+
+  // recorrer desde fila 2 saltando encabezados
+  for (var i = 1; i < datos.length; i++) {
+    dispositivos.push({
+      device_id: datos[i][0],
+      ultima_conexion: datos[i][1],
+      ip: datos[i][2],
+      rssi: datos[i][3],
+      estado: datos[i][4]
+    });
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ dispositivos: dispositivos }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
 
 /**
@@ -38,7 +78,7 @@ function doPost(e) {
 
     // parsear el cuerpo del request enviado por el ESP32
     var data = JSON.parse(e.postData.contents);
-    var ss   = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
 
     // proteccion: garantizar que payload exista aunque venga vacio
     if (!data.payload) data.payload = {};
@@ -48,7 +88,7 @@ function doPost(e) {
 
     // los CARD_SCAN van a Accesos, el resto (HEARTBEAT, DIAGNOSTIC) a Eventos
     var sheetNombre = (data.event_type === "CARD_SCAN") ? "Accesos" : "Eventos";
-    var sheet       = ss.getSheetByName(sheetNombre);
+    var sheet = ss.getSheetByName(sheetNombre);
 
     // crear hoja con encabezados si no existe
     if (!sheet) {
@@ -63,13 +103,13 @@ function doPost(e) {
     // el operador || garantiza un valor por defecto si el campo viene vacio
     sheet.appendRow([
       new Date(),
-      data.device_id        || "UNKNOWN",
-      data.event_type       || "UNKNOWN",
-      data.payload.card_id  || "N/A",
-      data.payload.status   || "N/A",
-      data.payload.ip       || "N/A",
-      data.payload.rssi     || 0,
-      data.payload.uptime   || 0,
+      data.device_id || "UNKNOWN",
+      data.event_type || "UNKNOWN",
+      data.payload.card_id || "N/A",
+      data.payload.status || "N/A",
+      data.payload.ip || "N/A",
+      data.payload.rssi || 0,
+      data.payload.uptime || 0,
       data.firmware_version || "N/A"
     ]);
 
@@ -88,7 +128,7 @@ function doPost(e) {
       ]);
     }
 
-    var datos      = invSheet.getDataRange().getValues();
+    var datos = invSheet.getDataRange().getValues();
     var encontrado = false;
 
     // buscar si el dispositivo ya tiene un registro en inventario
@@ -98,7 +138,7 @@ function doPost(e) {
 
         // dispositivo existente: actualizar su estado con los datos mas recientes
         invSheet.getRange(i + 1, 2).setValue(new Date());
-        invSheet.getRange(i + 1, 3).setValue(data.payload.ip   || "N/A");
+        invSheet.getRange(i + 1, 3).setValue(data.payload.ip || "N/A");
         invSheet.getRange(i + 1, 4).setValue(data.payload.rssi || 0);
         invSheet.getRange(i + 1, 5).setValue("ONLINE");
 
@@ -110,9 +150,9 @@ function doPost(e) {
     // dispositivo nuevo: agregar primera entrada en inventario
     if (!encontrado) {
       invSheet.appendRow([
-        data.device_id    || "UNKNOWN",
+        data.device_id || "UNKNOWN",
         new Date(),
-        data.payload.ip   || "N/A",
+        data.payload.ip || "N/A",
         data.payload.rssi || 0,
         "ONLINE"
       ]);
@@ -126,20 +166,20 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.JSON);
 
 
-  } catch(error) {
+  } catch (error) {
 
     // --- REGISTRO DE ERROR ---
 
     // cualquier excepcion se guarda en la hoja Logs para auditoria
     try {
-      var ss       = SpreadsheetApp.getActiveSpreadsheet();
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
       var logSheet = ss.getSheetByName("Logs") || ss.insertSheet("Logs");
-      logSheet.appendRow([ new Date(), "ERROR", error.toString() ]);
-    } catch(e) {}
+      logSheet.appendRow([new Date(), "ERROR", error.toString()]);
+    } catch (e) { }
 
     return ContentService
       .createTextOutput(JSON.stringify({
-        status:  "error",
+        status: "error",
         message: error.toString()
       }))
       .setMimeType(ContentService.MimeType.JSON);

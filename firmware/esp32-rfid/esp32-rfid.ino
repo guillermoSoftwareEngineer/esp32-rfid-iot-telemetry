@@ -7,24 +7,32 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
+// credenciales y configuracion privada
+// copiar secrets.example.h → secrets.h y completar los valores reales
+// secrets.h esta en .gitignore y NUNCA debe subirse al repositorio
+
+#include "secrets.h"
+
 
 // Version del firmware del dispositivo
 
 #define FIRMWARE_VERSION "1.0.0"
 
 
-// configuracion de red del dispositivo en wokwi
+// configuracion de red: WIFI_SSID y WIFI_PASSWORD se leen desde secrets.h
+// NO escribir credenciales directamente aqui
 
-const char* WIFI_SSID     = "Wokwi-GUEST"; 
-const char* WIFI_PASSWORD = ""; 
+const char* WIFI_SSID     = SECRET_WIFI_SSID;
+const char* WIFI_PASSWORD = SECRET_WIFI_PASSWORD;
 
 // identificador unico del dispositivo dentro del sistema o serie maquina
 
-const char* DEVICE_ID     = "GTech-ESP32-001"; 
+const char* DEVICE_ID     = "GTech-ESP32-001";
 
-// endpoint donde el dispositivo reporta eventos al backend URL del servidor
+// endpoint del backend: se lee desde secrets.h
+// NO escribir la URL real aqui
 
-const char* BACKEND_URL = "https://script.google.com/macros/s/AKfycbwA03zbv9tjDu1STr0X4c-7mgjOllzGlO6WFEqcd4Jj7jH0nmmB5KHaUzeAy5rvpBaB/exec";// version V1.3
+const char* BACKEND_URL   = SECRET_BACKEND_URL;
 
 
 // asignacion de pines usados por el hardware
@@ -32,7 +40,7 @@ const char* BACKEND_URL = "https://script.google.com/macros/s/AKfycbwA03zbv9tjDu
 #define PIN_LED_VERDE  26
 #define PIN_LED_ROJO   27
 #define PIN_BUZZER     25
-#define PIN_BOTON      13
+#define PIN_BOTON      14
 #define PIN_RFID_SS     5
 #define PIN_RFID_RST    4
 
@@ -141,7 +149,7 @@ void loop() {
 
   // lectura de boton para modo diagnostico
 
-  if (digitalRead(PIN_BOTON) == LOW) {
+  if (digitalRead(PIN_BOTON) == HIGH) {
     modoDiagnostico();
     delay(300);
   }
@@ -227,6 +235,9 @@ void procesarTarjeta() {
   }
 
   idTarjeta.toUpperCase();
+
+  // imprime el UID leido en el monitor serial para verificacion y debug
+  Serial.println("UID leido: " + idTarjeta);
 
   // verificacion contra base de datos local
 
@@ -329,6 +340,9 @@ void enviarEvento(String tipoEvento, String payloadExtra) {
   json += "}";
 
   json += "}";
+
+  // imprime el JSON completo para verificar que se construye correctamente
+  Serial.println("JSON: " + json);
 
   int codigo = http.POST(json);
 

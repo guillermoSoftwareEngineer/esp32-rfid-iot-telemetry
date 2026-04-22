@@ -1,147 +1,297 @@
-# ESP32 RFID IoT System
+# IoT RFID Access Control System (ESP32)
 
-IoT diagnostic and device monitoring project built with **ESP32**, **RFID**, and **Google Apps Script** as a serverless backend.
-
-The goal of this project is to demonstrate a functional IoT architecture capable of:
-
-* Identifying devices using RFID
-* Sending device telemetry
-* Storing information in the cloud
-* Monitoring device connectivity status
+[![ESP32](https://img.shields.io/badge/ESP32-IoT-blue)](https://www.espressif.com/)
+[![Arduino](https://img.shields.io/badge/Framework-Arduino-green)](https://www.arduino.cc/)
+[![Wokwi](https://img.shields.io/badge/Simulated%20on-Wokwi-7B2FBE)](https://wokwi.com/)
+[![Google Apps Script](https://img.shields.io/badge/Backend-Google%20Apps%20Script-4285F4)](https://developers.google.com/apps-script)
+[![Google Sheets](https://img.shields.io/badge/Database-Google%20Sheets-34A853)](https://sheets.google.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 ---
 
-# System Architecture
+## What is this project?
 
-![System Architecture](diagrams/system-architecture-en.png)
+An IoT access control system based on RFID, simulated in **Wokwi** using an **ESP32**. The device acts as an access machine: it reads RFID cards, validates their authorization, and reports every event to a cloud backend.
 
-The system is composed of three main components.
-
-## 1. IoT Device
-
-Hardware responsible for identification and data transmission.
-
-Components used:
-
-* ESP32
-* RFID RC522 reader
-* LCD 16x2 display
-* Status LEDs
-* Buzzer
-
-The device reads an RFID card, collects diagnostic information, and sends the data to the backend using WiFi.
+The backend is completely **serverless**: a **Google Apps Script** exposed as a Web App that receives HTTP POST events from the ESP32 and stores them in **Google Sheets**, which functions as a database and real-time monitoring dashboard.
 
 ---
 
-# IoT System Architecture
+## System Architecture
 
-![IoT Architecture](diagrams/iot-architecture-v1-en.png)
+```
+[Wokwi / ESP32]
+      │
+      │  HTTP POST (JSON)
+      ▼
+[Google Apps Script Web App]
+      │
+      │  SpreadsheetApp API
+      ▼
+[Google Sheets]
+ ├── Accesos    → CARD_SCAN events
+ ├── Eventos    → HEARTBEAT and DIAGNOSTIC events
+ ├── Inventario → current status of each device
+ └── Logs       → server errors
+```
 
-The overall architecture of the system follows this flow:
+### RFID Event Flow
 
-RFID → ESP32 → WiFi → HTTP API → Google Apps Script → Google Sheets
+1. The ESP32 detects an RFID card using the RC522 module.
+2. It reads the card's UID and converts it to hexadecimal.
+3. It verifies the UID against the local database of authorized cards.
+4. It displays the result on the LCD (`ACCESO OK` / `ACCESO DENEGADO`).
+5. It emits a short beep (authorized) or a long beep (denied).
+6. It sends a `CARD_SCAN` event to the backend via HTTP POST.
+7. Google Apps Script logs the event and updates the inventory.
 
-This allows IoT devices to send telemetry directly to the cloud using a **serverless backend architecture**.
+### Heartbeat (Life Signal)
 
----
-
-# Device Firmware Architecture
-
-![ESP32 Firmware Architecture](diagrams/device-firmware-architecture-v1-en.png)
-
-The ESP32 firmware is organized into modules responsible for:
-
-* Reading RFID cards
-* Managing WiFi connectivity
-* Building JSON messages
-* Sending HTTP requests
-* Monitoring device health and status
-
----
-
-# Backend
-
-The backend is implemented using **Google Apps Script**, acting as a serverless HTTP API.
-
-Backend responsibilities:
-
-* Receive HTTP requests from the device
-* Validate incoming data
-* Store information in Google Sheets
+Every 30 seconds, the ESP32 automatically sends a `HEARTBEAT` event to the backend, indicating that the device is still active. This allows for disconnection detection.
 
 ---
 
-# Database
+## Technologies
 
-Data storage is handled using **Google Sheets**.
-
-This enables:
-
-* Logging system events
-* Visualizing device telemetry
-* Monitoring activity in real time
-
----
-
-# Data Sent by the Device
-
-The ESP32 sends diagnostic information in **JSON format**, including:
-
-* `device_id`
-* `ip`
-* `rssi`
-* `free_heap`
-* `uptime`
-* `estado`
-
-These metrics allow monitoring of the operational status of the device.
+| Layer | Technology | Role |
+| :--- | :--- | :--- |
+| Simulation | Wokwi | Simulates the ESP32 and peripherals |
+| Microcontroller | ESP32 DevKit C v4 | Central unit of the IoT device |
+| RFID Reader | MFRC522 (SPI) | Reads RFID cards / tags |
+| Display | LCD 16x2 I2C | Shows status and user feedback |
+| Communication | HTTP REST over WiFi | Sends events to the backend |
+| Backend | Google Apps Script | Serverless API, processes POST events |
+| Database | Google Sheets | Stores events, inventory, and logs |
+| FW Framework | Arduino (C++) | Base of the ESP32 firmware |
 
 ---
 
-# Device States
+## Repository Structure
 
-The system defines three main states:
-
-**ONLINE**
-The device is connected and sending data successfully.
-
-**OFFLINE**
-The device stopped reporting activity.
-
-**ERROR**
-A failure occurred in the device or communication.
-
----
-
-# Technologies Used
-
-## Hardware
-
-* ESP32
-* RFID RC522
-* LCD 16x2
-
-## Software
-
-* Arduino Framework
-* Google Apps Script
-* HTTPClient
-* JSON
-
----
-
-# Project Goal
-
-This project is part of a technical portfolio focused on:
-
-* Internet of Things (IoT)
-* System architecture
-* Hardware–cloud integration
-* Device monitoring systems
-* Embedded systems connected to cloud services
+```
+iot-rfid-esp32/
+│
+├── firmware/
+│   └── esp32-rfid/
+│       ├── esp32-rfid.ino       ← Main ESP32 firmware
+│       ├── secrets.example.h    ← Credentials template (safe to commit)
+│       └── secrets.h            ← Real credentials (gitignored, DO NOT commit)
+│
+├── backend/
+│   └── Código.js                ← Google Apps Script (doGet + doPost)
+│
+├── diagrams/
+│   ├── diagram.json             ← Wokwi circuit diagram
+│   └── *.png / *.gif            ← Architecture diagrams and demos
+│
+├── Dashboard HTMLJS/
+│   └── index.html               ← Web dashboard that consumes the doGet API
+│
+├── docs/
+│   ├── architecture_en.md
+│   └── architecture_es.md
+│
+├── hardware/
+│   ├── BOM.md                   ← Bill of materials
+│   └── wiring-diagram-v1.jpg    ← Physical wiring diagram
+│
+├── .gitignore                   ← Protects secrets.h and build files
+├── README.md                    ← Main README
+├── README_en.md                 ← This file
+└── README_es.md
+```
 
 ---
 
-# License
+## Credentials Management (IMPORTANT)
 
-This project is released under the **MIT License**.
+This project uses a **secrets file** system to prevent exposing credentials in the repository. The Google Apps Script URL and the Sheet ID **must never be in the source code**.
+
+### How it works
+
+| File | Committed? | Purpose |
+| :--- | :--- | :--- |
+| `secrets.example.h` | Yes | Template with safe example values |
+| `secrets.h` | No (gitignore) | Real developer credentials |
+
+The firmware includes `secrets.h` via `#include "secrets.h"`. If that file does not exist, the compilation fails with a clear message. This is intentional: it forces each collaborator to configure their own credentials.
+
+### First-time Setup
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/tu-usuario/iot-rfid-esp32.git
+cd iot-rfid-esp32
+
+# 2. Create the secrets file
+cp firmware/esp32-rfid/secrets.example.h firmware/esp32-rfid/secrets.h
+
+# 3. Edit secrets.h with your real values
+# Open firmware/esp32-rfid/secrets.h and replace the placeholder values
+```
+
+### Content of `secrets.h`
+
+```cpp
+#ifndef SECRETS_H
+#define SECRETS_H
+
+// WiFi Network
+// For Wokwi: "Wokwi-GUEST" with empty password
+#define SECRET_WIFI_SSID     "Wokwi-GUEST"
+#define SECRET_WIFI_PASSWORD ""
+
+// URL of the Google Apps Script published as a Web App
+#define SECRET_BACKEND_URL   "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"
+
+// Google Sheet ID (visible in the spreadsheet URL)
+#define SECRET_SHEET_ID      "YOUR_SHEET_ID"
+
+#endif
+```
+
+---
+
+## Backend Setup (Google Apps Script)
+
+### Step 1 — Create the Google Sheet
+
+1. Go to [Google Sheets](https://sheets.google.com) and create a new spreadsheet.
+2. Copy the ID from the URL: `docs.google.com/spreadsheets/d/`**`YOUR_SHEET_ID`**`/edit`
+3. The script will automatically create the sheets: **Accesos**, **Eventos**, **Inventario**, **Logs**.
+
+### Step 2 — Create the Apps Script
+
+1. In the spreadsheet: **Extensions → Apps Script**.
+2. Delete the default content.
+3. Paste the content of `backend/Código.js`.
+4. Save with `Ctrl+S`.
+
+### Step 3 — Deploy as Web App
+
+1. **Deploy → New deployment**.
+2. Type: **Web app**.
+3. Execute as: **Me (your Google account)**.
+4. Who has access: **Anyone**.
+5. Click **Deploy**.
+6. Copy the generated URL (ends in `/exec`).
+7. Paste it in `secrets.h` as the value for `SECRET_BACKEND_URL`.
+
+> **Note:** Every time you modify the script and redeploy, a new version is generated. If the URL changes, update `secrets.h`.
+
+---
+
+## Simulate in Wokwi
+
+### Requirements
+
+- Account on [wokwi.com](https://wokwi.com)
+- The `diagrams/diagram.json` file with the circuit
+- The firmware `firmware/esp32-rfid/esp32-rfid.ino`
+
+### Steps
+
+1. Create a new ESP32 project in Wokwi.
+2. Import `diagram.json` or recreate the circuit manually.
+3. Copy the content of `esp32-rfid.ino` to the Wokwi editor.
+4. In Wokwi, **`secrets.h` is not used** — WiFi values are pre-configured for `Wokwi-GUEST`.
+5. Update the `BACKEND_URL` constant directly in the Wokwi editor with your real URL.
+
+> **In Wokwi**, the `Wokwi-GUEST` WiFi network is a virtual network without a password that provides internet access. The simulated ESP32 can make real HTTP requests to Google Apps Script.
+
+---
+
+## Hardware Connections
+
+| Component | Pin/Signal | ESP32 GPIO |
+| :--- | :--- | :--- |
+| RFID RC522 | SDA (SS) | GPIO 5 |
+| RFID RC522 | SCK | GPIO 18 |
+| RFID RC522 | MOSI | GPIO 23 |
+| RFID RC522 | MISO | GPIO 19 |
+| RFID RC522 | RST | GPIO 4 |
+| RFID RC522 | VCC | 3.3V |
+| LCD 16x2 I2C | SDA | GPIO 21 |
+| LCD 16x2 I2C | SCL | GPIO 22 |
+| Green LED | Anode | GPIO 26 |
+| Red LED | Anode | GPIO 27 |
+| Buzzer | Signal | GPIO 25 |
+| Button | Signal | GPIO 14 |
+
+---
+
+## Backend API
+
+### `POST /exec` — Receive event from ESP32
+
+**JSON Body:**
+```json
+{
+  "device_id": "GTech-ESP32-001",
+  "event_type": "CARD_SCAN",
+  "firmware_version": "1.0.0",
+  "payload": {
+    "card_id": "01020304",
+    "status": "success",
+    "ip": "10.10.0.2",
+    "rssi": -72,
+    "uptime": 47
+  }
+}
+```
+
+**Event Types (`event_type`):**
+- `CARD_SCAN` → RFID card read (authorized or not)
+- `HEARTBEAT` → Periodic life signal (every 30 s)
+- `DIAGNOSTIC_RESPONSE` → Diagnostic report via button
+
+**Successful Response:**
+```json
+{ "status": "success" }
+```
+
+### `GET /exec` — Get device inventory
+
+Returns the current status of all registered devices. Used by the Web Dashboard.
+
+```json
+{
+  "dispositivos": [
+    {
+      "device_id": "GTech-ESP32-001",
+      "ultima_conexion": "2026-04-21T21:00:00.000Z",
+      "ip": "10.10.0.2",
+      "rssi": -72,
+      "estado": "ONLINE"
+    }
+  ]
+}
+```
+
+---
+
+## Authorized Cards (Local Database)
+
+The firmware has a local list of authorized UIDs. This allows the system to work even without an internet connection (offline mode):
+
+```cpp
+String tarjetasAutorizadas[] = {
+  "A1B2C3D4",
+  "E5F6G7H8",
+  "12345678",
+  "01020304"   // default test card in Wokwi
+};
+```
+
+The default test card in Wokwi is `01020304`.
+
+---
+
+## License
+
+MIT License — See [LICENSE](LICENSE)
+
+---
+
+*Technical Portfolio Project — Guillermo Vásquez*  
+*IoT Engineering · Google Apps Script · ESP32 · RFID*
