@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GTech — IoT Control Center</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -77,13 +78,12 @@
 
     .nav-logo {
       width: 32px; height: 32px;
-      background: var(--color-brand-blue);
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 20px rgba(37, 99, 235, 0.25);
+      overflow: hidden;
     }
 
-    .nav-logo svg { width: 16px; height: 16px; fill: #fff; }
+    .nav-logo img { width: 32px; height: 32px; object-fit: contain; display: block; }
 
     .nav-title {
       font-family: var(--font-mono);
@@ -447,7 +447,7 @@
   <nav>
     <div class="nav-brand">
       <div class="nav-logo">
-        <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        <img src="images/logo.png" alt="GTech Logo">
       </div>
       <span class="nav-title">GTech · <span>IoT Control</span></span>
     </div>
