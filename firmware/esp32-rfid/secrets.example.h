@@ -24,6 +24,10 @@
 // Ejemplo: https://script.google.com/macros/s/AKfy.../exec
 #define SECRET_BACKEND_URL   "YOUR_GOOGLE_APPS_SCRIPT_URL"
 
+// Token de seguridad para escribir datos (doPost) en Google Sheets
+// Debe coincidir con la variable API_TOKEN en backend/Código.js
+#define SECRET_API_TOKEN     "YOUR_API_TOKEN"
+
 // --- Google Sheets ---
 // ID del spreadsheet que actua como base de datos
 // Se encuentra en la URL: docs.google.com/spreadsheets/d/TU_SHEET_ID/edit

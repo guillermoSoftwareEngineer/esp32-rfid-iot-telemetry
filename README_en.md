@@ -51,6 +51,16 @@ Every 30 seconds, the ESP32 automatically sends a `HEARTBEAT` event to the backe
 
 ---
 
+## Live Dashboard
+
+**[→ Open live dashboard](https://guillermosoftwareengineer.github.io/esp32-rfid-iot-telemetry/)**
+
+![Dashboard in real time — Wokwi + GitHub Pages](diagrams/IotvDashB.gif)
+
+Real-time monitoring of connected devices. The dashboard reads from Google Sheets via `doGet` and auto-refreshes every 30 seconds.
+
+---
+
 ## Technologies
 
 | Layer | Technology | Role |
@@ -229,6 +239,7 @@ cp firmware/esp32-rfid/secrets.example.h firmware/esp32-rfid/secrets.h
 {
   "device_id": "GTech-ESP32-001",
   "event_type": "CARD_SCAN",
+  "token": "YOUR_API_TOKEN",
   "firmware_version": "1.0.0",
   "payload": {
     "card_id": "01020304",

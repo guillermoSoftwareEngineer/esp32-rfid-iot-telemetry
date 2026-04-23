@@ -92,6 +92,15 @@ iot-rfid-esp32/
 ├── hardware/                    ← BOM and wiring diagrams
 └── .gitignore
 ```
+---
+
+## Live Dashboard
+
+**[→ Open live dashboard](https://guillermosoftwareengineer.github.io/esp32-rfid-iot-telemetry/)**
+
+![Dashboard in real time — Wokwi + GitHub Pages](diagrams/IotvDashB.gif)
+
+---
 
 ---
 

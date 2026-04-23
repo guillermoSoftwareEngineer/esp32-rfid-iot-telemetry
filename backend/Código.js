@@ -1,6 +1,6 @@
 /**
  * GTech IoT Backend - Google Apps Script
- * Version 1.0.0
+ * Version 1.1.0
  *
  * Recibe eventos HTTP POST desde dispositivos ESP32
  * y los almacena en Google Sheets para monitoreo y auditoria.
@@ -13,17 +13,59 @@
  */
 
 
+// Token de seguridad para escritura (POST).
+// IMPORTANTE: En el código de GitHub déjalo como "TU_TOKEN_SECRETO".
+// Cuando lo pegues en Google Apps Script, cámbialo por una clave segura real.
+var API_TOKEN = "TU_TOKEN_SECRETO";
+
 /**
  * doGet - endpoint de lectura para el dashboard
  *
- * Devuelve el estado actual de todos los dispositivos
- * registrados en la hoja Inventario en formato JSON.
+ * Sin parametros    → devuelve inventario de dispositivos
+ * ?sheet=Accesos    → devuelve historial de accesos RFID
  *
- * @returns {TextOutput} JSON con array de dispositivos
+ * @param {Object} e - objeto de evento HTTP
+ * @returns {TextOutput} JSON con dispositivos o accesos
  */
 function doGet(e) {
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var tipo = e && e.parameter && e.parameter.sheet;
+
+  // --- SI EL DASHBOARD PIDE ACCESOS ---
+
+  if (tipo === "Accesos") {
+
+    var accSheet = ss.getSheetByName("Accesos");
+
+    // si no existe la hoja devolver array vacio
+    if (!accSheet) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ accesos: [] }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var filas = accSheet.getDataRange().getValues();
+    var accesos = [];
+
+    // recorrer desde fila 2 saltando encabezados
+    // columnas: Fecha(0), Device ID(1), Tipo Evento(2), Card ID(3), Status(4)
+    for (var i = 1; i < filas.length; i++) {
+      accesos.push({
+        fecha: filas[i][0],
+        device_id: filas[i][1],
+        card_id: filas[i][3],
+        status: filas[i][4]
+      });
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ accesos: accesos }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // --- POR DEFECTO DEVUELVE INVENTARIO ---
+
   var invSheet = ss.getSheetByName("Inventario");
 
   // si no existe inventario devolver array vacio
@@ -78,6 +120,15 @@ function doPost(e) {
 
     // parsear el cuerpo del request enviado por el ESP32
     var data = JSON.parse(e.postData.contents);
+    
+    // --- VERIFICACION DE SEGURIDAD ---
+    // Solo permitimos la escritura si el dispositivo envía el token correcto
+    if (data.token !== API_TOKEN) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: "error", message: "Unauthorized access" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     var ss = SpreadsheetApp.getActiveSpreadsheet();
 
     // proteccion: garantizar que payload exista aunque venga vacio

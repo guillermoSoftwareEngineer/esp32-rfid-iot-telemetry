@@ -321,6 +321,8 @@ void enviarEvento(String tipoEvento, String payloadExtra) {
 
   json += "\"event_type\":\"" + tipoEvento + "\",";
 
+  json += "\"token\":\"" + String(SECRET_API_TOKEN) + "\",";
+
   json += "\"timestamp\":" + String(millis()/1000) + ",";
 
   json += "\"firmware_version\":\"" FIRMWARE_VERSION "\",";
