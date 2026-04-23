@@ -45,7 +45,8 @@ El backend es completamente **serverless**: un **Google Apps Script** expuesto c
 4. Muestra el resultado en el LCD (`ACCESO OK` / `ACCESO DENEGADO`)
 5. Emite un beep corto (autorizado) o largo (denegado)
 6. Envía un evento `CARD_SCAN` al backend vía HTTP POST
-7. Google Apps Script registra el evento y actualiza el inventario
+7. Google Apps Script registra el evento y actualiza el inventario en Google Sheets
+8. El Web Dashboard (`index.html`) refleja el evento en tiempo real mediante auto-refresh cada 30 segundos (`doGet`)
 
 ### Heartbeat (señal de vida)
 

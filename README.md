@@ -33,6 +33,10 @@ Complete workflow: RFID card scan → HTTP POST → Google Apps Script → Googl
 
 ![System Demo](diagrams/demo_1.gif)
 
+Live system: Wokwi simulation → Google Apps Script → Google Sheets → Web Dashboard (auto-refresh every 30s)
+
+![Live Dashboard — Wokwi simulation + real-time monitoring](diagrams/IotvDashB.gif)
+
 ---
 
 ## System Architecture
