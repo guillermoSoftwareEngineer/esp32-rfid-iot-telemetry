@@ -38,7 +38,7 @@ Complete workflow: RFID card scan → HTTP POST → Google Apps Script → Googl
 ## System Architecture
 
 ```
-[Wokwi / ESP32]  →  HTTP POST  →  [Google Apps Script]  →  [Google Sheets]
+[Wokwi / ESP32]  →  HTTP POST  →  [Google Apps Script]  ↔  [Google Sheets]  ←  HTTP GET  ←  [Web Dashboard]
 ```
 
 ![System Architecture](diagrams/system-architecture-en.png)

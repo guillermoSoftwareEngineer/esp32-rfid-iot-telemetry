@@ -13,26 +13,28 @@
 
 Sistema IoT de control de acceso basado en RFID simulado en **Wokwi** con un **ESP32**. El dispositivo actúa como una máquina de acceso: lee tarjetas RFID, valida su autorización y reporta cada evento al backend en la nube.
 
-El backend es completamente **serverless**: un **Google Apps Script** expuesto como Web App que recibe eventos HTTP POST del ESP32 y los almacena en **Google Sheets**, que funciona como base de datos y panel de monitoreo en tiempo real.
+El backend es completamente **serverless**: un **Google Apps Script** expuesto como Web App que recibe eventos HTTP POST del ESP32 y los almacena en **Google Sheets**. Además, cuenta con un **Web Dashboard** (`index.html`) que consume estos datos a través de una API REST (`doGet`) para ofrecer un monitoreo en tiempo real de los dispositivos y los accesos.
 
 ---
 
 ## Arquitectura del sistema
 
 ```
-[Wokwi / ESP32]
-      │
-      │  HTTP POST (JSON)
-      ▼
-[Google Apps Script Web App]
-      │
-      │  SpreadsheetApp API
-      ▼
-[Google Sheets]
- ├── Accesos    → eventos CARD_SCAN
- ├── Eventos    → HEARTBEAT y DIAGNOSTIC
- ├── Inventario → estado actual de cada dispositivo
- └── Logs       → errores del servidor
+  [Wokwi / ESP32]               [Web Dashboard (index.html)]
+ (esp32-rfid.ino)                (Auto-refresh cada 30s)
+         │                                  │
+         │ HTTP POST (JSON)                 │ HTTP GET (doGet)
+         │                                  │
+         ▼                                  ▼
+      [Google Apps Script Web App (backend/Código.js)]
+                           │
+                           │ SpreadsheetApp API
+                           ▼
+                    [Google Sheets]
+  ├── Accesos    → eventos CARD_SCAN
+  ├── Eventos    → HEARTBEAT y DIAGNOSTIC
+  ├── Inventario → estado actual de cada dispositivo
+  └── Logs       → errores del servidor
 ```
 
 ### Flujo de un evento RFID
@@ -70,8 +72,9 @@ Monitoreo en tiempo real de los dispositivos conectados. El dashboard lee los da
 | Lector RFID     | MFRC522 (SPI)           | Lee tarjetas / tags RFID               |
 | Pantalla        | LCD 16x2 I2C            | Muestra estado y feedback al usuario   |
 | Comunicación    | HTTP REST sobre WiFi    | Envío de eventos al backend            |
-| Backend         | Google Apps Script      | API serverless, procesa eventos POST   |
+| Backend         | Google Apps Script      | API serverless (`doPost` / `doGet`)    |
 | Base de datos   | Google Sheets           | Almacena eventos, inventario y logs    |
+| Frontend        | HTML, CSS, Vanilla JS   | Web Dashboard para monitoreo en vivo   |
 | Framework FW    | Arduino (C++)           | Base del firmware del ESP32            |
 
 ---
@@ -222,6 +225,8 @@ cp firmware/esp32-rfid/secrets.example.h firmware/esp32-rfid/secrets.h
 5. Actualizar la constante `BACKEND_URL` directamente en el editor de Wokwi con tu URL real
 
 > **En Wokwi** la red WiFi `Wokwi-GUEST` es una red virtual sin contraseña que da acceso a internet. El ESP32 simulado puede hacer peticiones HTTP reales a Google Apps Script.
+
+![Diagrama del circuito en Wokwi](diagrams/ckt.png)
 
 ---
 
