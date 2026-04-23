@@ -83,32 +83,46 @@ iot-rfid-esp32/
 │
 ├── firmware/
 │   └── esp32-rfid/
-│       ├── esp32-rfid.ino       ← Firmware principal del ESP32
-│       ├── secrets.example.h    ← Plantilla de credenciales (subir al repo)
-│       └── secrets.h            ← Credenciales reales (en .gitignore, NO subir)
+│       ├── esp32-rfid.ino       ← Firmware principal para ESP32
+│       ├── secrets.example.h    ← Plantilla de credenciales (segura para commit)
+│       └── .gitignore           ← Ignora archivos de compilación y locales
 │
 ├── backend/
-│   └── Código.js                ← Google Apps Script (doGet + doPost)
-│
-├── diagrams/
-│   ├── diagram.json             ← Diagrama Wokwi del circuito
-│   └── *.png / *.gif            ← Diagramas de arquitectura y demos
+│   ├── Código.js                ← Lógica de Google Apps Script (doGet + doPost)
+│   ├── appsscript.json          ← Manifiesto del proyecto Apps Script
+│   └── .clasp.json              ← Configuración para gestión con clasp
 │
 ├── Dashboard HTMLJS/
-│   └── index.html               ← Dashboard web que consume el doGet
+│   └── images/                  ← Assets visuales del dashboard
+│       ├── favicon.png
+│       └── logo.png
+│
+├── diagrams/
+│   ├── diagram.json             ← Diagrama de circuito para Wokwi
+│   └── *.png / *.gif            ← Diagramas de arquitectura y demostraciones
 │
 ├── docs/
-│   ├── architecture_en.md
-│   └── architecture_es.md
+│   ├── architecture_en.md       ← Documentación de arquitectura (Inglés)
+│   └── architecture_es.md       ← Documentación de arquitectura (Español)
 │
 ├── hardware/
-│   ├── BOM.md                   ← Lista de componentes
+│   ├── BOM.md                   ← Listado de materiales (Bill of Materials)
 │   └── wiring-diagram-v1.jpg    ← Diagrama de cableado físico
 │
-├── .gitignore                   ← Protege secrets.h y archivos de build
-├── README.md                    ← Este archivo
-├── README_en.md
-└── README_es.md
+├── comprensionAcademica/        ← Recursos adicionales de aprendizaje/pruebas
+│   ├── Código.js
+│   └── sketchComprension.ino
+│
+├── tests/
+│   └── payload-samples.json     ← Ejemplos de datos para pruebas de API
+│
+├── index.html                   ← Dashboard web (punto de entrada principal)
+├── Iotv1.drawio                 ← Diagrama original editable
+├── LICENSE                      ← Licencia del proyecto
+├── .gitignore                   ← Protección de secretos y archivos de sistema
+├── README.md                    ← Documentación general
+├── README_en.md                 ← README en Inglés
+└── README_es.md                 ← README en Español
 ```
 
 ---

@@ -83,32 +83,46 @@ iot-rfid-esp32/
 │
 ├── firmware/
 │   └── esp32-rfid/
-│       ├── esp32-rfid.ino       ← Main ESP32 firmware
+│       ├── esp32-rfid.ino       ← Main ESP32 firmware logic
 │       ├── secrets.example.h    ← Credentials template (safe to commit)
-│       └── secrets.h            ← Real credentials (gitignored, DO NOT commit)
+│       └── .gitignore           ← Ignores build artifacts and local secrets
 │
 ├── backend/
-│   └── Código.js                ← Google Apps Script (doGet + doPost)
-│
-├── diagrams/
-│   ├── diagram.json             ← Wokwi circuit diagram
-│   └── *.png / *.gif            ← Architecture diagrams and demos
+│   ├── Código.js                ← Google Apps Script logic (doGet + doPost)
+│   ├── appsscript.json          ← Apps Script project manifest
+│   └── .clasp.json              ← Configuration for clasp management
 │
 ├── Dashboard HTMLJS/
-│   └── index.html               ← Web dashboard that consumes the doGet API
+│   └── images/                  ← Visual assets for the dashboard
+│       ├── favicon.png
+│       └── logo.png
+│
+├── diagrams/
+│   ├── diagram.json             ← Wokwi circuit diagram configuration
+│   └── *.png / *.gif            ← Architecture diagrams and visual demos
 │
 ├── docs/
-│   ├── architecture_en.md
-│   └── architecture_es.md
+│   ├── architecture_en.md       ← Architecture documentation (English)
+│   └── architecture_es.md       ← Architecture documentation (Spanish)
 │
 ├── hardware/
-│   ├── BOM.md                   ← Bill of materials
-│   └── wiring-diagram-v1.jpg    ← Physical wiring diagram
+│   ├── BOM.md                   ← Bill of Materials
+│   └── wiring-diagram-v1.jpg    ← Physical wiring and connection diagram
 │
-├── .gitignore                   ← Protects secrets.h and build files
-├── README.md                    ← Main README
-├── README_en.md                 ← This file
-└── README_es.md
+├── comprensionAcademica/        ← Additional learning and testing resources
+│   ├── Código.js
+│   └── sketchComprension.ino
+│
+├── tests/
+│   └── payload-samples.json     ← Sample JSON payloads for API testing
+│
+├── index.html                   ← Web dashboard (main entry point)
+├── Iotv1.drawio                 ← Original editable architecture diagram
+├── LICENSE                      ← Project license
+├── .gitignore                   ← Global git ignore rules
+├── README.md                    ← Main project documentation
+├── README_en.md                 ← README in English
+└── README_es.md                 ← README in Spanish
 ```
 
 ---
