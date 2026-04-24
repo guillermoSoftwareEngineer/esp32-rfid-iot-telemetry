@@ -7,6 +7,7 @@ El sistema implementa una arquitectura IoT ligera utilizando:
 * **ESP32** como dispositivo IoT
 * **Google Apps Script** como backend serverless
 * **Google Sheets** como almacenamiento de datos
+* **Web Dashboard** como interfaz de monitoreo frontend
 
 Esta arquitectura permite construir sistemas IoT funcionales sin necesidad de servidores dedicados ni infraestructura compleja.
 
@@ -16,13 +17,14 @@ Esta arquitectura permite construir sistemas IoT funcionales sin necesidad de se
 
 ![Arquitectura del sistema](../diagrams/system-architecture-es.png)
 
-El sistema se organiza en tres capas principales:
+El sistema se organiza en cuatro capas principales:
 
 1. **Dispositivo IoT**
 2. **Backend serverless**
 3. **Almacenamiento de datos**
+4. **Web Dashboard (Frontend)**
 
-El dispositivo recopila información del sistema y la envía al backend mediante solicitudes HTTP.
+El dispositivo recopila información del sistema y la envía al backend mediante solicitudes HTTP, mientras que el dashboard consume estos datos para monitoreo en tiempo real.
 
 ---
 
@@ -32,9 +34,10 @@ El dispositivo recopila información del sistema y la envía al backend mediante
 
 La arquitectura general del sistema sigue el siguiente flujo:
 
-RFID → ESP32 → WiFi → HTTP API → Google Apps Script → Google Sheets
+* **Adquisición de Datos (Escritura):** RFID → ESP32 → WiFi → HTTP API (doPost) → Google Apps Script → Google Sheets
+* **Visualización de Datos (Lectura):** Web Dashboard → HTTP API (doGet) → Google Apps Script → Google Sheets
 
-Este enfoque permite implementar soluciones IoT utilizando únicamente servicios cloud serverless.
+Este enfoque permite implementar soluciones IoT utilizando únicamente servicios cloud serverless, y permite a un frontend desacoplado consumir los datos.
 
 ---
 
@@ -58,6 +61,7 @@ Esta organización facilita la modularidad y el mantenimiento del código.
 
 El flujo de datos del sistema ocurre en los siguientes pasos:
 
+**Adquisición y Almacenamiento de Datos:**
 1. El ESP32 obtiene información diagnóstica del sistema:
 
    * RSSI (intensidad de señal WiFi)
@@ -72,6 +76,11 @@ El flujo de datos del sistema ocurre en los siguientes pasos:
 4. **Google Apps Script** recibe la solicitud.
 
 5. Los datos se registran en **Google Sheets**.
+
+**Visualización de Datos:**
+6. El **Web Dashboard** envía periódicamente una solicitud **HTTP GET** al backend.
+7. Google Apps Script lee el último inventario y registros de acceso desde Google Sheets.
+8. El backend devuelve una respuesta JSON que el dashboard renderiza en tiempo real.
 
 Este flujo permite monitorear dispositivos IoT de forma centralizada.
 
@@ -121,3 +130,13 @@ Permite:
 * monitorear el estado de los dispositivos
 
 ---
+
+## Web Dashboard (Frontend)
+
+Una aplicación de página única estática (`index.html`) que sirve como interfaz de monitoreo.
+
+Funciones principales:
+
+* obtener datos en tiempo real del backend mediante HTTP GET (`doGet`)
+* visualizar el inventario de dispositivos y su estado de conexión
+* mostrar los últimos registros de acceso RFID

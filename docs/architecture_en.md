@@ -7,6 +7,7 @@ The system implements a lightweight IoT architecture using:
 * **ESP32** as the IoT device
 * **Google Apps Script** as a serverless backend
 * **Google Sheets** as the data storage layer
+* **Web Dashboard** as the frontend monitoring interface
 
 This architecture allows building functional IoT systems without requiring dedicated servers or complex infrastructure.
 
@@ -16,13 +17,14 @@ This architecture allows building functional IoT systems without requiring dedic
 
 ![System Architecture](../diagrams/system-architecture-en.png)
 
-The system is organized into three main layers:
+The system is organized into four main layers:
 
 1. **IoT Device**
 2. **Serverless Backend**
 3. **Data Storage**
+4. **Web Dashboard (Frontend)**
 
-The device collects system information and sends it to the backend using HTTP requests.
+The device collects system information and sends it to the backend using HTTP requests, while the dashboard consumes this data for real-time monitoring.
 
 ---
 
@@ -32,9 +34,10 @@ The device collects system information and sends it to the backend using HTTP re
 
 The overall architecture follows this data flow:
 
-RFID → ESP32 → WiFi → HTTP API → Google Apps Script → Google Sheets
+* **Data Acquisition (Write):** RFID → ESP32 → WiFi → HTTP API (doPost) → Google Apps Script → Google Sheets
+* **Data Visualization (Read):** Web Dashboard → HTTP API (doGet) → Google Apps Script → Google Sheets
 
-This approach allows IoT devices to communicate directly with cloud services using a **serverless architecture**.
+This approach allows IoT devices to communicate directly with cloud services using a **serverless architecture**, and enables a decoupled frontend to consume the data.
 
 ---
 
@@ -58,6 +61,7 @@ This modular design improves maintainability and scalability.
 
 The system data flow occurs in the following steps:
 
+**Data Acquisition & Storage:**
 1. The ESP32 gathers diagnostic information from the device:
 
    * RSSI (WiFi signal strength)
@@ -72,6 +76,11 @@ The system data flow occurs in the following steps:
 4. **Google Apps Script** receives the request.
 
 5. The data is stored in **Google Sheets**.
+
+**Data Visualization:**
+6. The **Web Dashboard** periodically sends an **HTTP GET request** to the backend.
+7. Google Apps Script reads the latest inventory and access logs from Google Sheets.
+8. The backend returns a JSON response which the dashboard renders in real-time.
 
 This pipeline enables centralized monitoring of IoT devices.
 
@@ -121,3 +130,13 @@ It allows:
 * monitoring device activity
 
 ---
+
+## Web Dashboard (Frontend)
+
+A static single-page application (`index.html`) that serves as the monitoring interface.
+
+Main responsibilities:
+
+* fetch real-time data from the backend via HTTP GET (`doGet`)
+* visualize device inventory and connection status
+* display the latest RFID access logs

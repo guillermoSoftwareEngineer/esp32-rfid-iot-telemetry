@@ -4,23 +4,38 @@
 // Token de seguridad para escritura (POST).
 // IMPORTANTE: En el código de GitHub déjalo como "TU_TOKEN_SECRETO".
 // Cuando lo pegues en Google Apps Script, cámbialo por una clave segura real.
-var API_TOKEN = "TU_TOKEN_SECRETO"; // esta variable protege nuestra base de datos de inyecciones falsas
+var API_TOKEN = "TU_TOKEN_SECRETO"; // Ees la clave que permite comunicacion entre
+// este backend y el ESP32 que simula maquinas en entornos reales
 
 
-function doGet(e) { // Evento necesario para que el Dashboard web pueda consultar datos por HTTP GET
-  var ss = SpreadsheetApp.getActiveSpreadsheet(); // se direcciona al sheet de google esta app se creo desde esa hoja por defecto apunta a ella
-  var tipo = e && e.parameter && e.parameter.sheet; // lee los parametros de la URL, si la URL dice ?sheet=Accesos, se guarda esa palabra en la variable tipo
-  // el uso de e && e.parameter evita que el codigo falle si no se envian parametros manejo de errores ocultos
+function doGet(e) { // Esta funcion se dispara cuando el dashboard hace una peticion GET, en este caso la que se hace desde el dashboard.html
+  var ss = SpreadsheetApp.getActiveSpreadsheet(); // se guarda la hoja activa, SpreadsheetApp Es una clase nativa de Google Apps Script y 
+  // su metodo getActiveSpreadsheet() devuelve una referencia a la hoja de cálculo activa google sheets en este caso 
+  // donde se registran (accesos, eventos e inventario)
+
+  var tipo = e && e.parameter && e.parameter.sheet;
+
+  // Esto se divide en tres partes fundamentales 
+
+  // 1. la parte e  se refiere a que exista el evento HTTP
+  // 2. la parte e.parameter verifica que hay parámetros en la URL como: ?sheet=Accesos
+  // 3. la parte e.parameter.sheet accede que el parámetro sheet sea igual a "Accesos"
+
+  // Se guarda en la variable tipos Esto es para que el backend pueda acceder a la informacion 
 
   // --- SI EL DASHBOARD PIDE ACCESOS ---
 
-  if (tipo === "Accesos") { // si la variable tipo es exactamente igual a "Accesos"
+  if (tipo === "Accesos") { // si la variable tipo es exactamente igual a "Accesos" se ingresa en este ciclo if
 
     var accSheet = ss.getSheetByName("Accesos"); // busca la pestaña Accesos
 
-    if (!accSheet) { // comprueba si la variable accSheet es diferente de null o vacio, es decir si la pestaña no existe
-      return ContentService // funcion que devuelve respuesta a la maquina o dispositivo
-        .createTextOutput(JSON.stringify({ accesos: [] })) // envia un array vacio en formato JSON crudo
+    //ya sabemos que getSheetByName es una funcion propia de Google Apps Script
+    // .getSheetByName("Accesos") Es un método que significa:Dame la hoja (pestaña) que se llame exactamente Accesos (su informacion) 
+
+
+    if (!accSheet) { // comprueba si la variable accSheet esta vacia, si lo esta entra en este ciclo
+      return ContentService // ContentService es propia de Google Apps Script Sirve para construir respuestas HTTP es el empaquetador de la respuesta
+        .createTextOutput(JSON.stringify({ accesos: [] })) // envia un array vacio en formato JSON crudo, JSON.stringify convierte el array de objetos a texto JSON
         .setMimeType(ContentService.MimeType.JSON); // Content-Type o MIME Type Define el encabezado Header de la respuesta como JSON
     }
 
@@ -75,9 +90,9 @@ function doGet(e) { // Evento necesario para que el Dashboard web pueda consulta
 
 function doPost(e) { // Evento necesario desde el ESP32 para activar la funcion doPost de escritura
   try { // primera funcion de manejo del evento, intenta ejecutar el bloque, la segunda es catch si hay errores
-    
+
     var data = JSON.parse(e.postData.contents); // recibe el contenido del evento y lo guarda parseado mediante metodo convirtiendolo en JSON crudo
-    
+
     // --- VERIFICACION DE SEGURIDAD ---
     // Solo permitimos la escritura si el dispositivo envía el token correcto en el JSON
     if (data.token !== API_TOKEN) { // si el token que viene de la placa no es igual al de la variable secreta
@@ -90,28 +105,28 @@ function doPost(e) { // Evento necesario desde el ESP32 para activar la funcion 
 
     if (!data.payload) data.payload = {}; // si el objeto no trae payload, entonces creala como un objeto vacio
     // se procesan datos asi vengan incompletos, si se usan en otro lugar no causa fallo
-    
+
     var sheetNombre = (data.event_type === "CARD_SCAN") ? "Accesos" : "Eventos"; // operador ternario
     // si el tipo de evento es un CARD SCAN se guarda en Accesos si no en Eventos 
-    
+
     var sheet = ss.getSheetByName(sheetNombre); // pone el evento en la pestaña correcta luego de la ejecucion del Oper Ternario
     // funciona coherentemente con la linea anterior
 
     if (!sheet) { // comprueba si la variable sheet es diferente de null o vacio
       sheet = ss.insertSheet(sheetNombre); // si esa funcion se cumple se inserta en sheet el valor de la variable sheetNombre se crea la pestaña con ese nombre
-      sheet.appendRow(["Fecha","Device ID","Tipo Evento","Card ID","Status","IP","RSSI","Uptime","Firmware"]); // como funciona como objeto el append añade al final la informacion, creando titulos
+      sheet.appendRow(["Fecha", "Device ID", "Tipo Evento", "Card ID", "Status", "IP", "RSSI", "Uptime", "Firmware"]); // como funciona como objeto el append añade al final la informacion, creando titulos
     } // separado por comas define cada colomna como cuando copiamos datos en excel
 
     sheet.appendRow([ // manejo de errores ocultos si no se encuentra el valor se reemplaza por otro valor con el operador or || para no dejar valores vacios
       // importante en el manejo de datos data scienst
       new Date(),           // llama la hora y fecha actual, si se ejecuta en el sitio de monitoreo, se ahorra sincronizacion de hora en cada dispositivo
-      data.device_id        || "UNKNOWN",
-      data.event_type       || "UNKNOWN",
-      data.payload.card_id  || "N/A",
-      data.payload.status   || "N/A",
-      data.payload.ip       || "N/A",
-      data.payload.rssi     || 0,
-      data.payload.uptime   || 0,
+      data.device_id || "UNKNOWN",
+      data.event_type || "UNKNOWN",
+      data.payload.card_id || "N/A",
+      data.payload.status || "N/A",
+      data.payload.ip || "N/A",
+      data.payload.rssi || 0,
+      data.payload.uptime || 0,
       data.firmware_version || "N/A"
     ]);
 
@@ -119,7 +134,7 @@ function doPost(e) { // Evento necesario desde el ESP32 para activar la funcion 
     var invSheet = ss.getSheetByName("Inventario"); // busca la pestaña inventario
     if (!invSheet) { // si la pestaña inventario no existe
       invSheet = ss.insertSheet("Inventario"); // crea la pestaña
-      invSheet.appendRow(["Device ID","Ultima Conexion","IP","RSSI","Estado"]); // escribe titulos de las columnas
+      invSheet.appendRow(["Device ID", "Ultima Conexion", "IP", "RSSI", "Estado"]); // escribe titulos de las columnas
     }
 
     var datos = invSheet.getDataRange().getValues(); // se guarda en esta variable el rango desde 0 hasta terminar y se obtienen los valores de ese rango
@@ -128,10 +143,10 @@ function doPost(e) { // Evento necesario desde el ESP32 para activar la funcion 
 
     for (var i = 1; i < datos.length; i++) { // se empieza en la fila 1 por que 0 es titulos en sheets de google, se revisa el largo del inventario, salta siguiente fila
       if (datos[i][0] == data.device_id) { // mira la Columna A indice 0 de la fila actual i ademas Compara ese texto con el ID que acaba de enviar el ESP32
-        invSheet.getRange(i+1,2).setValue(new Date()); // por el titulo se debe poner en la siguiente fila por eso i+1 en todos, 2 equivale a columna b ultima conexion
-        invSheet.getRange(i+1,3).setValue(data.payload.ip   || "N/A"); // 3 equivale a columna C IP
-        invSheet.getRange(i+1,4).setValue(data.payload.rssi || 0); // 4 equivale a columna D RSSI estado de la conexion fuerte,debil, etc
-        invSheet.getRange(i+1,5).setValue("ONLINE"); // 5 equivale a columna E estado del dispositivo o maquina ONLINE, OFFLINE, ALARM, etc
+        invSheet.getRange(i + 1, 2).setValue(new Date()); // por el titulo se debe poner en la siguiente fila por eso i+1 en todos, 2 equivale a columna b ultima conexion
+        invSheet.getRange(i + 1, 3).setValue(data.payload.ip || "N/A"); // 3 equivale a columna C IP
+        invSheet.getRange(i + 1, 4).setValue(data.payload.rssi || 0); // 4 equivale a columna D RSSI estado de la conexion fuerte,debil, etc
+        invSheet.getRange(i + 1, 5).setValue("ONLINE"); // 5 equivale a columna E estado del dispositivo o maquina ONLINE, OFFLINE, ALARM, etc
         encontrado = true; // cambia la variable a TRue para confirmar que la informacion se encontro
         break; // Rompe el iterador de busqueda, por que si ya se encontro el dispositivo o maquina es ineficiente seguir buscando
       }
@@ -140,29 +155,29 @@ function doPost(e) { // Evento necesario desde el ESP32 para activar la funcion 
     if (!encontrado) { // Si la variable al finalizar el for anterior no encontro el dispositivo, sigue en false y
       // si aqui es verdadero con la negacion se ejecuta, es decir solo se ejecuta si el dispositivo o maquina no se encontro
       invSheet.appendRow([ // se agrega a la fila en cada columna los datos del nuevo dispositivo
-        data.device_id    || "UNKNOWN", // Se agrega a cada fila el valor del nuevo dispositivo o maquina si no se pone el valor por defecto para evitar errores ocultos
+        data.device_id || "UNKNOWN", // Se agrega a cada fila el valor del nuevo dispositivo o maquina si no se pone el valor por defecto para evitar errores ocultos
         new Date(),         // para la columna ultima conexion se ejecuta esta funcion siempre no necesita alternativa a null
-        data.payload.ip   || "N/A",
+        data.payload.ip || "N/A",
         data.payload.rssi || 0,
         "ONLINE"            // Si se encontro obviamente esta en linea, si no estaria apagado
       ]);
     }
 
     return ContentService // funcion que devuelve respuesta a la maquina o dispositivo, para que sepa que el mensaje se recibio en el backend bien
-      .createTextOutput(JSON.stringify({status:"success"})) // se envia un texto en formato JSON con la palabra SUCCESS
+      .createTextOutput(JSON.stringify({ status: "success" })) // se envia un texto en formato JSON con la palabra SUCCESS
       .setMimeType(ContentService.MimeType.JSON); // Content-Type o MIME Type Define el encabezado Header de la respuesta como JSON
-      // Esto le indica al ESP32 que el contenido es un dato estructurado y no una pagina web.
+    // Esto le indica al ESP32 que el contenido es un dato estructurado y no una pagina web.
 
-  } catch(error) { // segunda funcion de manejo actua con try esta se dispara si hay errores de ejecucion en javascript
+  } catch (error) { // segunda funcion de manejo actua con try esta se dispara si hay errores de ejecucion en javascript
     try {
       var ss = SpreadsheetApp.getActiveSpreadsheet(); // se direcciona al sheet de google esta app se creo desde esa hoja por defecto apunta a ella
       var logSheet = ss.getSheetByName("Logs") || ss.insertSheet("Logs"); // Busca la pestaña Logs, si no existe, la crea con insertSheet
       logSheet.appendRow([new Date(), "ERROR", error.toString()]); // Agrega el error a la variable logSheet y pone la hora y fecha el error en formato string y lo agrega a una nueva fila
-    } catch(e){} // Silent catch Si falla el registro en la hoja de Logs, se ignora el error para evitar un bucle infinito
-      // y asegura que el servidor siempre responda al ESP32
+    } catch (e) { } // Silent catch Si falla el registro en la hoja de Logs, se ignora el error para evitar un bucle infinito
+    // y asegura que el servidor siempre responda al ESP32
 
     return ContentService
-      .createTextOutput(JSON.stringify({status:"error",message:error.toString()})) // Retorno de contingencia Informa al ESP32 que la operación fallo
+      .createTextOutput(JSON.stringify({ status: "error", message: error.toString() })) // Retorno de contingencia Informa al ESP32 que la operación fallo
       .setMimeType(ContentService.MimeType.JSON); // y envia el detalle tecnico del error en formato JSON
   }
 }
