@@ -47,3 +47,12 @@ desktop.ini
 *.log
 *.tmp
 *.temp
+
+# =============================================================
+# REPORTES GENERADOS (reports/)
+# =============================================================
+
+# Los PDFs se generan localmente con generate_report.py.
+# Nunca se deben subir: pueden contener datos de dispositivos o clientes.
+*.pdf
+reports/*.pdf

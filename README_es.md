@@ -117,6 +117,11 @@ iot-rfid-esp32/
 │   ├── Código.js
 │   └── sketchComprension.ino
 │
+├── reports/
+│   ├── generate_report.py       ← Script generador de informes PDF
+│   ├── README_REPORTS.md        ← Documentación del generador (Inglés)
+│   └── README_REPORTS_es.md    ← Documentación del generador (Español)
+│
 ├── tests/
 │   └── payload-samples.json     ← Ejemplos de datos para pruebas de API
 │
@@ -315,6 +320,29 @@ String tarjetasAutorizadas[] = {
 ```
 
 La tarjeta de prueba por defecto en Wokwi es `01020304`.
+
+---
+
+## Generar informe técnico en PDF
+
+La carpeta `reports/` contiene un script Python que descarga los datos de telemetría desde Google Sheets y genera un informe técnico en PDF — sin necesidad de credenciales.
+
+```bash
+cd reports
+pip install reportlab matplotlib requests
+
+# Ejecutar con datos de demo (sin internet)
+python generate_report.py --demo
+
+# Ejecutar con datos reales de Sheets, filtrado por ID de dispositivo
+python generate_report.py --device ESP32-BUK-001
+
+# Nombre de archivo personalizado
+python generate_report.py --device ESP32-BUK-001 --output informe_junio_2025.pdf
+```
+
+Los PDFs generados se guardan en `reports/` y están excluidos del control de versiones mediante `.gitignore`.
+Ver [`reports/README_REPORTS_es.md`](reports/README_REPORTS_es.md) para la documentación completa.
 
 ---
 
