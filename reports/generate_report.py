@@ -36,6 +36,10 @@ from reportlab.platypus import (
 # ══════════════════════════════════════════════════════
 CONFIG = {
     # URL del backend (mismo que usa el dashboard)
+    # NOTA DE SEGURIDAD: En produccion, usar variable de entorno en lugar de hardcodear:
+    #   "BACKEND_URL": os.environ.get("BACKEND_URL", "YOUR_URL_HERE"),
+    # Para esta v1 de demostracion se deja expuesta para funcionalidad inmediata.
+    # El endpoint doGet es de solo lectura — la escritura (doPost) requiere un token.
     "BACKEND_URL": "https://script.google.com/macros/s/AKfycbysF0JGfK8m6KkML1TJLBboY9u4tEyqlNRktfIDO-PT2PDQqfWaTqwWq7arMmpFaGU5/exec",
 
     # Branding del autor

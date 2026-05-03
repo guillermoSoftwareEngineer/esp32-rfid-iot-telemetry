@@ -118,6 +118,7 @@
     .nav-title span {
       background: linear-gradient(135deg, #93C5FD, #3B82F6);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -224,6 +225,7 @@
     .page-title span {
       background: linear-gradient(135deg, #93C5FD, #3B82F6);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -704,6 +706,11 @@
   </div>
 
   <script>
+    // NOTA DE SEGURIDAD: En un entorno de produccion, esta URL no deberia estar hardcodeada.
+    // Se puede proteger usando GitHub Actions + GitHub Secrets para inyectarla en tiempo de deploy,
+    // manteniendo el codigo fuente limpio de credenciales (ver .github/workflows/).
+    // Para esta v1 de demostración se deja expuesta para que GitHub Pages funcione correctamente.
+    // El endpoint doGet es de solo lectura — la escritura (doPost) requiere un token de seguridad.
     const BACKEND_URL = "https://script.google.com/macros/s/AKfycbysF0JGfK8m6KkML1TJLBboY9u4tEyqlNRktfIDO-PT2PDQqfWaTqwWq7arMmpFaGU5/exec";
     const OFFLINE_THRESHOLD = 2;
     const REFRESH_INTERVAL = 30000;

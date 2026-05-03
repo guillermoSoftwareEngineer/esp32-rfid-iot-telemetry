@@ -16,6 +16,9 @@
 // Token de seguridad para escritura (POST).
 // IMPORTANTE: En el código de GitHub déjalo como "TU_TOKEN_SECRETO".
 // Cuando lo pegues en Google Apps Script, cámbialo por una clave segura real.
+// NOTA DE SEGURIDAD: En produccion, usar un token robusto (UUID o cadena de 32+ caracteres).
+// Este token impide que terceros escriban datos en Google Sheets mediante doPost.
+// El endpoint doGet (lectura) es publico intencionalmente — lo consumen el dashboard y el generador de informes.
 var API_TOKEN = "TU_TOKEN_SECRETO";
 
 /**

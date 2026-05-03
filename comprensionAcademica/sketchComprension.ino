@@ -17,7 +17,7 @@
 const char* WIFI_SSID     = "Wokwi-GUEST"; //nombre publico de la red wifi en wokwi la red simulada se llama "Wokwi-GUEST"
 const char* WIFI_PASSWORD = ""; // "Wokwi-GUEST" no tiene una clave, una red real si la tendria
 const char* DEVICE_ID     = "GTech-ESP32-001"; // numero de serie de el equipo a monitorear o que se le da nombre ID
-const char* BACKEND_URL = "https://script.google.com/macros/s/AKfycbzEMIsm5Rp30PZVPamPe43E4wfETraQNPLswf8ahRPsL-L7RTjkw0FA-mMwkluCq3Ch/exec";
+const char* BACKEND_URL = "AQUI_VA_LA_URL_DE_LA_IMPLEMENTACION_DE_APP_SCRIPT"; // pegar la URL generada al publicar como Web App
 //url del servidor backen creado en Google Apps Script (guarda datos en google sheets a futuro en DB)
 
   
@@ -26,7 +26,7 @@ const char* BACKEND_URL = "https://script.google.com/macros/s/AKfycbzEMIsm5Rp30P
 #define PIN_LED_VERDE  26
 #define PIN_LED_ROJO   27
 #define PIN_BUZZER     25
-#define PIN_BOTON      13
+#define PIN_BOTON      14
 #define PIN_RFID_SS     5
 #define PIN_RFID_RST    4
 
@@ -54,7 +54,8 @@ const unsigned long INTERVALO_HEARTBEAT = 30000; // aqui se configura el tiempo 
 String tarjetasAutorizadas[] = { //pequeña base de datos, migrar a DB profesional en version 2
   "A1B2C3D4",
   "E5F6G7H8",
-  "12345678"
+  "12345678",
+  "01020304" // tarjeta de prueba en Wokwi para probar acceso autorizado
 };
 const int totalTarjetas = sizeof(tarjetasAutorizadas) / sizeof(tarjetasAutorizadas[0]); //Total de tarjetas de UID en el sistema que
 // se actualizan la cantidad de tarjetas de forma automatica 
@@ -122,7 +123,7 @@ void loop() {
 
   //Se lee el pin de conexion del boton
 
-  if (digitalRead(PIN_BOTON) == LOW) {
+  if (digitalRead(PIN_BOTON) == HIGH) {
     modoDiagnostico(); //se ejecuta la funcion de diagnostico
     delay(300);
   }
@@ -230,6 +231,11 @@ void enviarEvento(String tipoEvento, String payloadExtra) { //Void = no retorna 
 
   HTTPClient http; //se crea el objeto de comunicacion HTTP
   http.begin(BACKEND_URL); //Se indica la URL de conexion del servidor ubicacion del servidor
+
+  // fuerza al ESP32 a seguir la redireccion 302 de Google Apps Script
+  // sin esto el POST se convierte en GET y los datos no llegan al backend
+  http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+
   http.addHeader("Content-Type", "application/json"); //indicacion de encabezado de mensaje etiqueta el envio de JSON
 
   //En cada evento de envio se crean todas las claves a continuacion si se ejecutan esas funciones
@@ -239,6 +245,8 @@ void enviarEvento(String tipoEvento, String payloadExtra) { //Void = no retorna 
   json += "\"event_id\":\"" + generarEventID() + "\","; // ID unico del evento generado por el dispositivo.
   json += "\"device_id\":\"" + String(DEVICE_ID) + "\",";// ID unico del evento generado por el dispositivo.
   json += "\"event_type\":\"" + tipoEvento + "\","; // Tipo de evento que ocurrio HEARTBEAT, CARD_SCAN, DIAGNOSTIC_RESPONSE
+  json += "\"token\":\"TU_TOKEN_SECRETO\","; // Token de seguridad que debe coincidir con API_TOKEN en Código.js
+  // En produccion usar un token robusto (UUID o cadena de 32+ caracteres)
   json += "\"timestamp\":" + String(millis()/1000) + ","; //Marca de tiempo del evento.
   json += "\"firmware_version\":\"" FIRMWARE_VERSION "\","; //Versión del firmware instalado en el dispositivo.
   json += "\"payload\":{";
