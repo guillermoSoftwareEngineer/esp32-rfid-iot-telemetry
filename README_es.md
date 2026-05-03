@@ -35,6 +35,8 @@ El backend es completamente **serverless**: un **Google Apps Script** expuesto c
    Monitoreo en tiempo real         Genera informes PDF
 ```
 
+![Arquitectura del sistema](diagrams/system-architecture-es.png)
+
 ### Flujo de un evento RFID
 
 1. El ESP32 detecta una tarjeta RFID con el módulo RC522
@@ -45,6 +47,8 @@ El backend es completamente **serverless**: un **Google Apps Script** expuesto c
 6. Envía un evento `CARD_SCAN` al backend vía HTTP POST
 7. Google Apps Script registra el evento y actualiza el inventario en Google Sheets
 8. El Web Dashboard (`index.html`) refleja el evento en tiempo real mediante auto-refresh cada 30 segundos (`doGet`)
+
+![Flujo del Firmware](diagrams/firmware-flow-diagram-v1-es.png)
 
 ### Heartbeat (señal de vida)
 
@@ -339,6 +343,8 @@ python generate_report.py --device ESP32-BUK-001
 # Nombre de archivo personalizado
 python generate_report.py --device ESP32-BUK-001 --output informe_junio_2025.pdf
 ```
+
+![Demo Generación PDF](diagrams/GenReport.gif)
 
 Los PDFs generados se guardan en `reports/` y están excluidos del control de versiones mediante `.gitignore`.
 Ver [`reports/README_REPORTS_es.md`](reports/README_REPORTS_es.md) para la documentación completa.

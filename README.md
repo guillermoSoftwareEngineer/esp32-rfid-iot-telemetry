@@ -57,6 +57,8 @@ Wokwi (ESP32) ──POST + token──► Apps Script (doPost) ──► Google 
 
 ![System Architecture](diagrams/system-architecture-en.png)
 
+![Firmware Flow](diagrams/firmware-flow-diagram-v1-en.png)
+
 ---
 
 ## Credentials Setup (IMPORTANT)
@@ -113,6 +115,8 @@ python generate_report.py --device ESP32-BUK-001
 # Custom output filename
 python generate_report.py --device ESP32-BUK-001 --output report_june_2025.pdf
 ```
+
+![PDF Generation Demo](diagrams/GenReport.gif)
 
 Generated PDFs are saved in `reports/` and excluded from version control via `.gitignore`.
 See [`reports/README_REPORTS.md`](reports/README_REPORTS.md) for full documentation.
