@@ -42,7 +42,17 @@ Live system: Wokwi simulation → Google Apps Script → Google Sheets → Web D
 ## System Architecture
 
 ```
-[Wokwi / ESP32]  →  HTTP POST  →  [Google Apps Script]  ↔  [Google Sheets]  ←  HTTP GET  ←  [Web Dashboard]
+                        WRITE
+Wokwi (ESP32) ──POST + token──► Apps Script (doPost) ──► Google Sheets
+                                                                │
+                        READ                                    │
+                   ◄──── Apps Script (doGet) ◄─────────────────┘
+                                   │
+             ┌─────────────────────┴─────────────────────┐
+             ▼                                           ▼
+ GitHub Pages (index.html)                 generate_report.py
+  Real-time web dashboard                  Local Python script
+  Auto-refresh every 30 s                 Generates PDF reports
 ```
 
 ![System Architecture](diagrams/system-architecture-en.png)
@@ -80,6 +90,8 @@ See [README_es.md](README_es.md) for full setup instructions (Google Apps Script
 | Communication   | HTTP REST over WiFi     |
 | Backend         | Google Apps Script      |
 | Database        | Google Sheets           |
+| Frontend        | HTML, CSS, Vanilla JS   |
+| Reports         | Python, ReportLab       |
 | Firmware        | Arduino Framework (C++) |
 
 ---
@@ -146,7 +158,8 @@ iot-rfid-esp32/
 │
 ├── reports/
 │   ├── generate_report.py       ← PDF report generator script
-│   └── README_REPORTS.md        ← Report generator documentation
+│   ├── README_REPORTS.md        ← Report generator documentation (English)
+│   └── README_REPORTS_es.md     ← Report generator documentation (Spanish)
 │
 ├── tests/
 │   └── payload-samples.json     ← Sample JSON payloads for API testing
@@ -166,7 +179,7 @@ iot-rfid-esp32/
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/exec` | `POST` | Receives events from ESP32 (CARD_SCAN, HEARTBEAT, DIAGNOSTIC) |
-| `/exec` | `GET` | Returns device inventory — consumed by the dashboard |
+| `/exec` | `GET` | Returns device inventory and access logs — consumed by the dashboard and `generate_report.py` |
 
 See [README_en.md](README_en.md) for full API documentation.
 

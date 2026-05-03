@@ -20,21 +20,19 @@ El backend es completamente **serverless**: un **Google Apps Script** expuesto c
 ## Arquitectura del sistema
 
 ```
-  [Wokwi / ESP32]               [Web Dashboard (index.html)]
- (esp32-rfid.ino)                (Auto-refresh cada 30s)
-         │                                  │
-         │ HTTP POST (JSON)                 │ HTTP GET (doGet)
-         │                                  │
-         ▼                                  ▼
+  [Wokwi / ESP32]                        [Google Sheets]
+ (esp32-rfid.ino)                         (base de datos)
+         │                                      ▲
+         │ HTTP POST + token                    │
+         │                                      │
+         ▼                                      │
       [Google Apps Script Web App (backend/Código.js)]
-                           │
-                           │ SpreadsheetApp API
-                           ▼
-                    [Google Sheets]
-  ├── Accesos    → eventos CARD_SCAN
-  ├── Eventos    → HEARTBEAT y DIAGNOSTIC
-  ├── Inventario → estado actual de cada dispositivo
-  └── Logs       → errores del servidor
+                      │ doGet (HTTP GET)
+            ┌─────────┴─────────────────────────┐
+            ▼                                   ▼
+  [GitHub Pages (index.html)]      [generate_report.py]
+   Dashboard — auto-refresh 30s     Script Python local
+   Monitoreo en tiempo real         Genera informes PDF
 ```
 
 ### Flujo de un evento RFID
@@ -76,6 +74,7 @@ Monitoreo en tiempo real de los dispositivos conectados. El dashboard lee los da
 | Backend         | Google Apps Script      | API serverless (`doPost` / `doGet`)    |
 | Base de datos   | Google Sheets           | Almacena eventos, inventario y logs    |
 | Frontend        | HTML, CSS, Vanilla JS   | Web Dashboard para monitoreo en vivo   |
+| Reportes        | Python, ReportLab       | Genera informes técnicos en PDF        |
 | Framework FW    | Arduino (C++)           | Base del firmware del ESP32            |
 
 ---

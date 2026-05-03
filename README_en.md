@@ -20,21 +20,19 @@ The backend is completely **serverless**: a **Google Apps Script** exposed as a 
 ## System Architecture
 
 ```
-  [Wokwi / ESP32]               [Web Dashboard (index.html)]
- (esp32-rfid.ino)                (Auto-refresh every 30s)
-         │                                  │
-         │ HTTP POST (JSON)                 │ HTTP GET (doGet)
-         │                                  │
-         ▼                                  ▼
+  [Wokwi / ESP32]                        [Google Sheets]
+ (esp32-rfid.ino)                         (database)
+         │                                      ▲
+         │ HTTP POST + token                    │
+         │                                      │
+         ▼                                      │
       [Google Apps Script Web App (backend/Código.js)]
-                           │
-                           │ SpreadsheetApp API
-                           ▼
-                    [Google Sheets]
-  ├── Accesos    → CARD_SCAN events
-  ├── Eventos    → HEARTBEAT and DIAGNOSTIC events
-  ├── Inventario → current status of each device
-  └── Logs       → server errors
+                      │ doGet (HTTP GET)
+            ┌─────────┴─────────────────────────┐
+            ▼                                   ▼
+  [GitHub Pages (index.html)]      [generate_report.py]
+   Dashboard — auto-refresh 30s     Local Python script
+   Real-time monitoring             Generates PDF reports
 ```
 
 ### RFID Event Flow
@@ -76,6 +74,7 @@ Real-time monitoring of connected devices. The dashboard reads from Google Sheet
 | Backend | Google Apps Script | Serverless API (`doPost` / `doGet`) |
 | Database | Google Sheets | Stores events, inventory, and logs |
 | Frontend | HTML, CSS, Vanilla JS | Live Web Dashboard for real-time monitoring |
+| Reports | Python, ReportLab | Generates technical PDF reports |
 | FW Framework | Arduino (C++) | Base of the ESP32 firmware |
 
 ---

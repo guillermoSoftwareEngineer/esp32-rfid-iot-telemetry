@@ -1,24 +1,30 @@
 # 📄 Technical Report Generator
 
-Automatic PDF report generation from real Google Sheets data. No credentials required — reads directly from the public sheet URL.
+Automatic PDF report generation from live Google Sheets data via the same backend API used by the dashboard. No credentials required — reads directly from the public `doGet` endpoint.
 
 ---
 
 ## Overview
 
-`generate_report.py` is a Python script that pulls live telemetry data from the Wokwi IoT RFID system's Google Sheet and produces a structured technical PDF report. It is designed to replicate the real-world task of generating automated maintenance and audit reports for IoT field devices.
+`generate_report.py` is a Python script that queries the Google Apps Script backend (`doGet`) of the IoT RFID system and generates a structured technical PDF report. It acts as an independent client of the same API consumed by the web dashboard, replicating the real-world task of generating automated maintenance and audit reports for IoT field devices.
+
+**How it connects to data:**
+
+```
+generate_report.py  →  HTTP GET (doGet)  →  Apps Script  →  Google Sheets
+```
+
+No CSV export, no direct Sheet access, no credentials — the same public endpoint that powers the live dashboard.
 
 **What the report includes:**
 
 | Section | Content |
 |---|---|
 | Header | Logo · Device ID · Generation timestamp · Author contact |
-| System Summary | Uptime % · Offline time · RFID events · Disconnections · Avg RSSI · Current status |
-| Device Info | ID · IP · Location · Client · Firmware version |
-| Connectivity Chart | Historical RSSI signal + ONLINE/OFFLINE state line + downtime bands |
-| Disconnection Log | Timestamped fault history with cause notes |
-| RFID Event Log | Card reads with UID, status and notes |
-| Diagnostics | Remote diagnostic records (if available) |
+| System Summary | Online devices · Offline devices · Total access events · Authorized vs. denied · Avg RSSI |
+| Device Inventory | Device ID · IP · WiFi signal · Last connection · Status |
+| Access History Chart | RFID access count per hour of day |
+| RFID Event Log | Card reads with UID, result (authorized/denied), device and timestamp |
 | Footer | Author name · GitHub · LinkedIn · Email |
 
 ---
@@ -31,7 +37,7 @@ Python 3.8 or higher. Install dependencies with:
 pip install reportlab matplotlib requests
 ```
 
-No API keys, no OAuth, no service accounts needed. The script reads from the public CSV export URL of the Google Sheet.
+No API keys, no OAuth, no service accounts needed.
 
 ---
 
@@ -44,81 +50,38 @@ cd reports
 # Run with demo data (no internet required — simulated dataset)
 python generate_report.py --demo
 
-# Run with real Sheets data, filter by device ID
-python generate_report.py --device ESP32-BUK-001
-
-# Custom output filename
-python generate_report.py --device ESP32-BUK-001 --output report_june_2025.pdf
-
-# Generate report for all devices in the sheet
+# Run with real live data from Google Sheets (via doGet)
 python generate_report.py
 
-# Inspect column names detected from the sheet (useful for troubleshooting)
-python generate_report.py --show-cols
+# Custom output filename
+python generate_report.py --output report_june_2025.pdf
 ```
 
 The PDF is saved in the `reports/` folder. It is excluded from version control via `.gitignore`.
 
 ---
 
-## Google Sheet Structure
+## How it works
 
-The script expects **row 1 to contain column headers**. The column names must match the values defined in the `CONFIG` block inside `generate_report.py`. Default expected names:
+The script makes two HTTP GET requests to the Apps Script backend — the same calls the web dashboard makes:
 
-| Column | Expected name | Example value |
-|---|---|---|
-| Device identifier | `device_id` | `ESP32-BUK-001` |
-| Event timestamp | `timestamp` | `2025-06-01 08:00:00` |
-| Event type | `event_type` | `heartbeat` |
-| RFID card UID | `card_uid` | `A3:F2:91:BC` |
-| Device IP | `ip` | `192.168.1.47` |
-| WiFi signal | `rssi` | `-62` |
-| Uptime in seconds | `uptime` | `3600` |
-| Physical location | `location` | `Main Office — Floor 3` |
-| Client name | `client` | `GTech Solutions` |
-| Connection status | `status` | `ONLINE` or `OFFLINE` |
-| Firmware version | `firmware_version` | `v1.2.3` |
-| Notes / cause | `notes` | `WiFi timeout — auto reconnect` |
+| Request | Response |
+|---|---|
+| `GET /exec` | Device inventory (ID, IP, RSSI, last connection, status) |
+| `GET /exec?sheet=Accesos` | RFID access log (card ID, result, device, timestamp) |
 
-**Valid `event_type` values recognized by the script:**
-
-```
-heartbeat    →  periodic device ping
-rfid_scan    →  card read event
-offline      →  device disconnected
-online       →  device reconnected
-diagnostic   →  remote diagnostic triggered
-```
-
-**Valid `status` values:** `ONLINE` · `OFFLINE` (uppercase)
-
-> If your column names differ, run `python generate_report.py --show-cols` to see what the script detects, then update the `CONFIG` block accordingly.
+It then analyzes the data, builds charts with `matplotlib`, and assembles the PDF with `reportlab`.
 
 ---
 
 ## Configuration
 
-All settings live in the `CONFIG` dictionary at the top of `generate_report.py`. You only need to edit this block.
+All settings are in the `CONFIG` dictionary at the top of `generate_report.py`. You only need to edit this block if something changes.
 
 ```python
 CONFIG = {
-    # Google Sheet (must be publicly accessible via "Anyone with the link")
-    "SHEET_ID":  "your_sheet_id_here",        # found in the sheet URL
-    "SHEET_GID": "your_gid_here",             # found after #gid= in the URL
-
-    # Column name mapping — must match your sheet's row 1 headers exactly
-    "COL_DEVICE_ID":  "device_id",
-    "COL_TIMESTAMP":  "timestamp",
-    "COL_EVENT_TYPE": "event_type",
-    "COL_CARD_UID":   "card_uid",
-    "COL_IP":         "ip",
-    "COL_RSSI":       "rssi",
-    "COL_UPTIME":     "uptime",
-    "COL_LOCATION":   "location",
-    "COL_CLIENT":     "client",
-    "COL_STATUS":     "status",
-    "COL_FIRMWARE":   "firmware_version",
-    "COL_NOTES":      "notes",
+    # Backend URL — same endpoint used by the web dashboard (doGet)
+    "BACKEND_URL": "YOUR_GOOGLE_APPS_SCRIPT_URL",
 
     # Report branding
     "BRAND_NAME":     "Your Name",
@@ -132,24 +95,21 @@ CONFIG = {
         "../Dashboard HTMLJS/images/logo.png",   # relative to reports/ folder
         "logo.png",                               # fallback: logo next to script
     ],
+
+    # A device is considered OFFLINE if it hasn't reported in more than this many minutes
+    "OFFLINE_THRESHOLD_MIN": 2,
 }
 ```
 
-**To find your Sheet ID and GID:** open the sheet in the browser. The URL follows this pattern:
-
-```
-https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=GID
-```
-
-Make sure the sheet is set to **"Anyone with the link can view"** — otherwise the script cannot download the data.
+**To get the backend URL:** deploy your `backend/Código.js` in Google Apps Script as a Web App (see main README for setup instructions). The URL ends in `/exec`.
 
 ---
 
 ## Logo
 
-The script searches for the logo in the paths listed under `LOGO_PATHS` in `CONFIG`, in order. It uses the first file that exists. If none is found, the report is generated without a logo and the script prints a warning.
+The script searches for the logo in the paths listed under `LOGO_PATHS` in `CONFIG`, in order. It uses the first file that exists. If none is found, the report is generated without a logo and a warning is printed.
 
-For this project the logo is already available at:
+For this project, the logo is already available at:
 
 ```
 Dashboard HTMLJS/images/logo.png
@@ -166,7 +126,8 @@ The generated PDF is saved in `reports/` by default. PDFs are excluded from the 
 ```
 reports/
 ├── generate_report.py        ← this script
-├── README_REPORTS.md         ← this file
+├── README_REPORTS.md         ← this file (English)
+├── README_REPORTS_es.md      ← this file (Spanish)
 └── informe_tecnico.pdf       ← generated output (gitignored)
 ```
 
@@ -182,30 +143,28 @@ cd iot-rfid-esp32/reports
 
 pip install reportlab matplotlib requests
 
-# Try with demo data first
+# Try with demo data first (no internet required)
 python generate_report.py --demo
 
-# Then with real data
-python generate_report.py --device ESP32-BUK-001
+# Then with real live data
+python generate_report.py
 ```
-
-No environment variables, no `.env` files, no credentials to configure. The sheet is public and the script reads it directly.
 
 ---
 
 ## Troubleshooting
 
-**PDF comes out empty or with no data**
-Run `python generate_report.py --show-cols` and compare the detected column names against the `COL_*` values in `CONFIG`. A single typo or extra space in a header will cause a mismatch.
+**"Error connecting to backend"**
+Check your internet connection. Verify the `BACKEND_URL` in `CONFIG` is the correct deployed URL (ends in `/exec`). You can test it by opening the URL in a browser — it should return a JSON response.
 
-**"Could not download sheet" error**
-Verify the sheet sharing is set to "Anyone with the link — Viewer". If the sheet is private, the CSV export URL returns an HTML login page instead of data.
+**PDF comes out with no data / empty sections**
+Run with `--demo` first to confirm the script works. If `--demo` works but real data doesn't, the issue is the backend connection or an empty Google Sheet.
 
 **Logo not appearing**
-The script will print `Logo not found` with a warning. Check that `logo.png` exists at `Dashboard HTMLJS/images/logo.png` relative to the repository root. The path must be accessible from `reports/` via `../`.
+The script will print a warning. Check that `logo.png` exists at `Dashboard HTMLJS/images/logo.png` relative to the repository root. The path must be accessible from `reports/` via `../`.
 
-**RSSI chart is empty**
-The chart requires rows where `event_type` is `heartbeat` and the `rssi` column contains a numeric value. If heartbeat events are missing or the RSSI field is blank, the chart renders with a "no data" message.
+**Chart shows no activity**
+The RFID access chart requires at least one entry in the `Accesos` sheet. If the sheet is empty, the chart renders with a "no records" message.
 
 ---
 
@@ -215,6 +174,7 @@ The root `.gitignore` already excludes generated PDFs:
 
 ```
 *.pdf
+reports/*.pdf
 ```
 
-Never commit PDF reports to the repository — they may contain client or device information and should be generated on demand.
+Never commit PDF reports to the repository — they may contain device or access data and should be generated on demand.
