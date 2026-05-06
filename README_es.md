@@ -13,7 +13,7 @@
 
 Sistema IoT de control de acceso basado en RFID simulado en **Wokwi** con un **ESP32**. El dispositivo actúa como una máquina de acceso: lee tarjetas RFID, valida su autorización y reporta cada evento al backend en la nube.
 
-El backend es completamente **serverless**: un **Google Apps Script** expuesto como Web App que recibe eventos HTTP POST del ESP32 y los almacena en **Google Sheets**. Además, cuenta con un **Web Dashboard** (`index.html`) que consume estos datos a través de una API REST (`doGet`) para ofrecer un monitoreo en tiempo real de los dispositivos y los accesos.
+El backend es completamente **serverless**: un **Google Apps Script** expuesto como Web App que recibe eventos HTTP POST del ESP32 y los almacena en **Google Sheets**. Además, cuenta con un **Web Dashboard** (`index.html`) que consume estos datos a través de una API REST (`doGet`) para ofrecer un monitoreo en tiempo real de los dispositivos y los accesos. Como complemento fundamental, el sistema incluye una herramienta local en **Python** para la **generación automática de reportes técnicos en PDF**, extrayendo la información de la base de datos de manera segura.
 
 ---
 
@@ -122,7 +122,7 @@ iot-rfid-esp32/
 │
 ├── reports/
 │   ├── generate_report.py       ← Script generador de informes PDF
-│   ├── README_REPORTS.md        ← Documentación del generador (Inglés)
+│   ├── README_REPORTS_en.md     ← Documentación del generador (Inglés)
 │   └── README_REPORTS_es.md    ← Documentación del generador (Español)
 │
 ├── tests/
@@ -337,11 +337,11 @@ pip install reportlab matplotlib requests
 # Ejecutar con datos de demo (sin internet)
 python generate_report.py --demo
 
-# Ejecutar con datos reales de Sheets, filtrado por ID de dispositivo
-python generate_report.py --device ESP32-BUK-001
+# Ejecutar con datos reales en vivo desde Google Sheets
+python generate_report.py
 
-# Nombre de archivo personalizado
-python generate_report.py --device ESP32-BUK-001 --output informe_junio_2025.pdf
+# Nombre de archivo de salida personalizado
+python generate_report.py --output informe_junio_2025.pdf
 ```
 
 ![Demo Generación PDF](diagrams/GenReport.gif)

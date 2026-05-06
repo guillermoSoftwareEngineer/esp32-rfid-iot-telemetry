@@ -12,7 +12,7 @@
 
 An IoT access control system based on RFID, simulated in **Wokwi** using an **ESP32**. The device reads RFID cards, validates authorization locally, and reports every event to a serverless cloud backend in real time.
 
-The system replicates the exact operational flow of an enterprise attendance control device: provisioning, connectivity monitoring, remote diagnostics, and technical reporting — all without paid infrastructure.
+The system replicates the exact operational flow of an enterprise attendance control device: provisioning, connectivity monitoring, remote diagnostics, and technical reporting — all without paid infrastructure. Additionally, it features a local **Python-based PDF report generator** that fetches live telemetry data directly from the cloud database to produce structured technical documentation.
 
 ---
 
@@ -109,17 +109,17 @@ pip install reportlab matplotlib requests
 # Run with demo data (no internet required)
 python generate_report.py --demo
 
-# Run with real Sheets data, filtered by device ID
-python generate_report.py --device ESP32-BUK-001
+# Run with real live data from Google Sheets
+python generate_report.py
 
 # Custom output filename
-python generate_report.py --device ESP32-BUK-001 --output report_june_2025.pdf
+python generate_report.py --output report_june_2025.pdf
 ```
 
 ![PDF Generation Demo](diagrams/GenReport.gif)
 
 Generated PDFs are saved in `reports/` and excluded from version control via `.gitignore`.
-See [`reports/README_REPORTS.md`](reports/README_REPORTS.md) for full documentation.
+See [`reports/README_REPORTS_en.md`](reports/README_REPORTS_en.md) for full documentation.
 
 ---
 
@@ -162,7 +162,7 @@ iot-rfid-esp32/
 │
 ├── reports/
 │   ├── generate_report.py       ← PDF report generator script
-│   ├── README_REPORTS.md        ← Report generator documentation (English)
+│   ├── README_REPORTS_en.md     ← Report generator documentation (English)
 │   └── README_REPORTS_es.md     ← Report generator documentation (Spanish)
 │
 ├── tests/

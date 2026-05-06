@@ -126,7 +126,7 @@ The generated PDF is saved in `reports/` by default. PDFs are excluded from the 
 ```
 reports/
 ├── generate_report.py        ← this script
-├── README_REPORTS.md         ← this file (English)
+├── README_REPORTS_en.md      ← this file (English)
 ├── README_REPORTS_es.md      ← this file (Spanish)
 └── informe_tecnico.pdf       ← generated output (gitignored)
 ```

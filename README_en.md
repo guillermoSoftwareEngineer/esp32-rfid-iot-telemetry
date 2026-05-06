@@ -13,7 +13,7 @@
 
 An IoT access control system based on RFID, simulated in **Wokwi** using an **ESP32**. The device acts as an access machine: it reads RFID cards, validates their authorization, and reports every event to a cloud backend.
 
-The backend is completely **serverless**: a **Google Apps Script** exposed as a Web App that receives HTTP POST events from the ESP32 and stores them in **Google Sheets**. Additionally, a **Live Web Dashboard** (`index.html`) consumes this data via a REST API (`doGet`) to provide real-time monitoring of devices and access logs.
+The backend is completely **serverless**: a **Google Apps Script** exposed as a Web App that receives HTTP POST events from the ESP32 and stores them in **Google Sheets**. Additionally, a **Live Web Dashboard** (`index.html`) consumes this data via a REST API (`doGet`) to provide real-time monitoring of devices and access logs. As a core feature, the system includes a local **Python** tool for **automatic technical PDF report generation**, securely extracting data from the database.
 
 ---
 
@@ -122,7 +122,7 @@ iot-rfid-esp32/
 │
 ├── reports/
 │   ├── generate_report.py       ← PDF report generator script
-│   ├── README_REPORTS.md        ← Report generator documentation (English)
+│   ├── README_REPORTS_en.md     ← Report generator documentation (English)
 │   └── README_REPORTS_es.md    ← Report generator documentation (Spanish)
 │
 ├── tests/
@@ -337,17 +337,17 @@ pip install reportlab matplotlib requests
 # Run with demo data (no internet required)
 python generate_report.py --demo
 
-# Run with real Sheets data, filtered by device ID
-python generate_report.py --device ESP32-BUK-001
+# Run with real live data from Google Sheets
+python generate_report.py
 
 # Custom output filename
-python generate_report.py --device ESP32-BUK-001 --output report_june_2025.pdf
+python generate_report.py --output report_june_2025.pdf
 ```
 
 ![PDF Generation Demo](diagrams/GenReport.gif)
 
 Generated PDFs are saved in `reports/` and excluded from version control via `.gitignore`.
-See [`reports/README_REPORTS.md`](reports/README_REPORTS.md) for full documentation.
+See [`reports/README_REPORTS_en.md`](reports/README_REPORTS_en.md) for full documentation.
 
 ---
 

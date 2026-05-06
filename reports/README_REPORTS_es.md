@@ -126,7 +126,7 @@ El PDF generado se guarda en `reports/` por defecto. Los PDFs están excluidos d
 ```
 reports/
 ├── generate_report.py        ← este script
-├── README_REPORTS.md         ← documentación (Inglés)
+├── README_REPORTS_en.md      ← documentación (Inglés)
 ├── README_REPORTS_es.md      ← este archivo (Español)
 └── informe_tecnico.pdf       ← salida generada (excluida del repo)
 ```
